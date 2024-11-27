@@ -1,10 +1,11 @@
 from sympy import *
 import matplotlib.pyplot as plt
 import numpy as np
-x,L = symbols('x L')
 
+# TODO: FULL CODE FOUND AT https://github.com/SirGavith/py/blob/main/modernphys_ps7-2.py
 
 #B
+x,L = symbols('x L')
 print('Symbolic c_n s:')
 def get_c_n(n):
     psi_n = sqrt(2/L) * sin(n*pi*x/L)

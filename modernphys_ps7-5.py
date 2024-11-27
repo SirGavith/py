@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.linalg as la
 
+# FULL CODE FOUND AT https://github.com/SirGavith/py/blob/main/modernphys_ps7-5.py
 
 # A
 def Vfunc(x, a, w, V0):
@@ -13,8 +14,6 @@ a = 53e-12
 w = 2e-12
 V0 = 3.12 * 1.6e-19
 N = 2000
-
-
 X = np.linspace(-4*a, 4*a, N)
 
 plt.subplot(1, 2, 1)
@@ -23,7 +22,6 @@ plt.plot(X, [Vfunc(x, a, w, V0) for x in X])
 # B
 m = 9.11e-31
 h_bar = 1.054e-34
-
 d = 8*a / (N-1)
 
 H = np.zeros((N,N))
@@ -49,18 +47,11 @@ eigens.sort(key=lambda eigen: eigen[0])
 print("smallest eigenvalues:")
 print([eigen[0] for eigen in eigens[:5]])
 
-
-
-plt.subplot(2, 2, 2)
-
 psi_numeric = eigens[0][1]
-
 C = np.sqrt(sum(d * psi_x**2 for psi_x in psi_numeric))
 
+plt.subplot(2, 2, 2)
 plt.plot(X, (psi_numeric / C))
-
 plt.subplot(2, 2, 4)
 plt.plot(X, (psi_numeric / C)**2)
-
-
 plt.show()
