@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from scipy.integrate import solve_ivp
 from perlin_numpy import generate_perlin_noise_2d
-# np.random.seed(0) <-- if you want it to be repeatable
+np.random.seed(0) # <-- if you want it to be repeatable
 
 alphas = np.array([5.0, 1.0, 7.0, 1.0]) # wind from: top, bottom, left, right
 # alphas = np.array([1.0,1.0,1.0,1.0]) # wind from: top, bottom, left, right
@@ -16,12 +16,12 @@ def create_initial_B():
 
 # Create flamibilty 2d array
 def create_flammibility():
-    f = np.random.rand(N, N) # flammability constants
+    # f = np.random.rand(N, N) # flammability constants
     # f = np.full((N,N), 0.5)
 
-    # f = generate_perlin_noise_2d((N, N), (N//10, N//10))
-    # f += 1
-    # f **= 4
+    f = generate_perlin_noise_2d((N, N), (N//10, N//10))
+    f += 1
+    f **= 4
     return f
 
 # Define the fire equation system
@@ -49,10 +49,11 @@ u_solutions = solution.y.reshape((N, N, solution.t.size)).transpose(2, 0, 1)
 
 # animate
 plt.imshow(f, cmap='gray', interpolation='nearest')
+plt.title("Flammability")
 plt.colorbar()
 
 fig, ax = plt.subplots()
-image = ax.imshow(u_solutions[0], cmap='hot', interpolation='nearest', vmax=1, vmin=0)
+image = ax.imshow(u_solutions[0], cmap='hot', interpolation='bilinear', vmax=1, vmin=0)
 plt.colorbar(image, ax=ax)
 ax.set_title("System Evolution Over Time")
 
@@ -61,4 +62,5 @@ def update_animation(frame):
     ax.set_title(f"Time: {solution.t[frame]:.2f}")
 
 ani = FuncAnimation(fig, update_animation, frames=len(t_points), interval=50, blit=False)
+# ani.save('./anims/6.mp4')
 plt.show()
