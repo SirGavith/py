@@ -4,7 +4,7 @@ from typing import Iterable
 
 import numpy as np
 
-from math.iterable_helpers import first
+from mathy.iterable_helpers import first
 
 # a | b iff Exists k s.t. ak = b
 def divides(a, b):
@@ -53,6 +53,6 @@ def two_adic_valuation(n):
 
 
 def isPrime(n):
-    for a in range(2, math.floor(math.sqrt(n))):
-        if n % a == 0: return False, a
+    for a in range(2, math.floor(math.sqrt(n)) + 1):
+        if n % a == 0: return False
     return True

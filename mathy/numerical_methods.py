@@ -67,7 +67,6 @@ def eulerimproved(f,initialy,initialx,dx,endpoint):
 
 # print(y)
 
-
 # Runge-Kutta Method and table sumarizing results
 
 def rungekutta(f,initialy,initialx,dx,endpoint):
