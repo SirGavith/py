@@ -35,7 +35,7 @@ def subtract(p1: Point, p2: Point):
 def angle(p1: Point, p2: Point, p3: Point):
     v1=subtract(p1, p2)
     v2=subtract(p3, p2)
-    return np.math.atan2(np.linalg.det([[v1.x, v1.y],[v2.x, v2.y]]),np.dot([v1.x, v1.y],[v2.x, v2.y]))
+    return np.atan2(np.linalg.det([[v1.x, v1.y],[v2.x, v2.y]]),np.dot([v1.x, v1.y],[v2.x, v2.y]))
 
 #distance between two points
 def dist(p1: Point, p2: Point):
@@ -264,21 +264,31 @@ def IsInVertexKernel(p1: Point, P: list[Point]):
         if crosses > 2: return False
     return True
 
-N = 300
-P = [Point(p[0] * N/10, N - p[1] * N/10) for p in [[0,0],[10,0],[10,10],[1,10],[8,8],[8,2],[5,6],[2,2],[0,9]]]
-plotpoly(P)
+# N = 300
+# P = [Point(p[0] * N/10, N - p[1] * N/10) for p in [[0,0],[10,0],[10,10],[1,10],[8,8],[8,2],[5,6],[2,2],[0,9]]]
+# plotpoly(P)
 
-IsInsidePolygon(Point(90,90), P)
+# IsInsidePolygon(Point(90,90), P)
 
-kernel = np.zeros((N, N))
+# kernel = np.zeros((N, N))
 
-for y in range(0, N):
-    for x in range(0, N):
-        kernel[y,x] = IsInVertexKernel(Point(x, y), P)
-        # kernel[y,x] = IsInsidePolygon(Point(x,y), P)
+# for y in range(0, N):
+#     for x in range(0, N):
+#         kernel[y,x] = IsInVertexKernel(Point(x, y), P)
+#         # kernel[y,x] = IsInsidePolygon(Point(x,y), P)
+
+# plt.imshow(kernel, cmap='gray', interpolation='nearest')
+
+S = [Point(*p) for p in [[0,0],[1,0],[1.5,1], [1,2]]]
+
+def LineDoesntPartitionPoints(pointset: list[Point], line: Line):
+    angles = [angle(line.p1, line.p2, p) for p in pointset]
+    return  all(a >= 0 for a in angles) or all(a < 0 for a in angles)
 
 
+assert LineDoesntPartitionPoints(S, Line(Point(0,1), Point(1,1.5))) == False
+assert LineDoesntPartitionPoints(S, Line(Point(0,1), Point(1,3))) == True
+assert LineDoesntPartitionPoints(S, Line(Point(0,1), Point(-0.5,0))) == True
 
-plt.imshow(kernel, cmap='gray', interpolation='nearest')
-
+plotpoints(S)
 plt.show()
