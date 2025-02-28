@@ -203,7 +203,7 @@ def countCrossingVerticies(ray: Line, p: list[Point]):
             n = p[(i+1) % len(p)]
             s3 = slope(Line(p[i], n) if p[i].x <= n.x else Line(n, p[i]))
 
-            if not (s1 > s2 > s3 or s1 < s2 < s3): count += 1
+            if (s1 > s2 > s3 or s1 < s2 < s3): count += 1
     return count
 
 #8
@@ -279,16 +279,32 @@ def IsInVertexKernel(p1: Point, P: list[Point]):
 
 # plt.imshow(kernel, cmap='gray', interpolation='nearest')
 
-S = [Point(*p) for p in [[0,0],[1,0],[1.5,1], [1,2]]]
+# S = [Point(*p) for p in [[0,0],[1,0],[1.5,1], [1,2]]]
 
-def LineDoesntPartitionPoints(pointset: list[Point], line: Line):
-    angles = [angle(line.p1, line.p2, p) for p in pointset]
-    return  all(a >= 0 for a in angles) or all(a < 0 for a in angles)
+# def LineDoesntPartitionPoints(pointset: list[Point], line: Line):
+#     angles = [angle(line.p1, line.p2, p) for p in pointset]
+#     return  all(a >= 0 for a in angles) or all(a < 0 for a in angles)
 
 
-assert LineDoesntPartitionPoints(S, Line(Point(0,1), Point(1,1.5))) == False
-assert LineDoesntPartitionPoints(S, Line(Point(0,1), Point(1,3))) == True
-assert LineDoesntPartitionPoints(S, Line(Point(0,1), Point(-0.5,0))) == True
+# assert LineDoesntPartitionPoints(S, Line(Point(0,1), Point(1,1.5))) == False
+# assert LineDoesntPartitionPoints(S, Line(Point(0,1), Point(1,3))) == True
+# assert LineDoesntPartitionPoints(S, Line(Point(0,1), Point(-0.5,0))) == True
+# plotpoints(S)
 
-plotpoints(S)
+
+
+def FindTriContainingPoint(triangulation: list[tuple[Point]], p: Point):
+    for tri in triangulation:
+        if IsInsidePolygon(p, tri):
+            return tri
+    return False
+
+T = [ (Point(0,0),Point(0,1),Point(1,0)), (Point(1,1),Point(0,1),Point(1,0)), (Point(1,0),Point(1,1),Point(2,0)), (Point(2,1),Point(1,1),Point(2,0))]
+p = Point(0.75, 0.75)
+
+[plotpoly(t) for t in T]
+plotpoints([p])
+
+print(FindTriContainingPoint(T, p))
+
 plt.show()
