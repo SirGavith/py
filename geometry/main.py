@@ -1,6 +1,7 @@
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+from itertools import combinations  
 
 class Point:
     x: float
@@ -12,6 +13,14 @@ class Point:
         return str(self.x) + ',' + str(self.y)
     def __eq__(self, value):
         return self.x == value.x and self.y == value.y
+    def __hash__(self):
+        seed = 0
+        for x in [self.x, self.y]:
+            x = ((x >> 16) ^ x) * 0x45d9f3b
+            x = ((x >> 16) ^ x) * 0x45d9f3b
+            x = (x >> 16) ^ x
+            seed ^= x + 0x9e3779b9 + (seed << 6) + (seed >> 2)
+        return seed
 
 class Line:
     p1: Point
@@ -281,9 +290,9 @@ def IsInVertexKernel(p1: Point, P: list[Point]):
 
 # S = [Point(*p) for p in [[0,0],[1,0],[1.5,1], [1,2]]]
 
-# def LineDoesntPartitionPoints(pointset: list[Point], line: Line):
-#     angles = [angle(line.p1, line.p2, p) for p in pointset]
-#     return  all(a >= 0 for a in angles) or all(a < 0 for a in angles)
+def LineDoesntPartitionPoints(pointset: list[Point], line: Line):
+    angles = [angle(line.p1, line.p2, p) for p in pointset]
+    return  all(a >= 0 for a in angles) or all(a < 0 for a in angles)
 
 
 # assert LineDoesntPartitionPoints(S, Line(Point(0,1), Point(1,1.5))) == False
@@ -299,12 +308,25 @@ def FindTriContainingPoint(triangulation: list[tuple[Point]], p: Point):
             return tri
     return False
 
-T = [ (Point(0,0),Point(0,1),Point(1,0)), (Point(1,1),Point(0,1),Point(1,0)), (Point(1,0),Point(1,1),Point(2,0)), (Point(2,1),Point(1,1),Point(2,0))]
 p = Point(0.75, 0.75)
 
-[plotpoly(t) for t in T]
-plotpoints([p])
+T = [ (Point(0,0),Point(0,1),Point(1,0)), (Point(1,1),Point(0,1),Point(1,0)), (Point(1,0),Point(1,1),Point(2,0)), (Point(2,1),Point(1,1),Point(2,0)), (Point(2,1),Point(3,2),Point(2,0))]
 
-print(FindTriContainingPoint(T, p))
+
+def FindFlippableEdges(triangulation: list[tuple[Point]]):
+    flippableEdges = []
+
+    for t1,t2 in combinations((set(t) for t in triangulation), 2):
+        polygon = t1.union(t2)
+        diag = t1.intersection(t2)
+        flipped = polygon.difference(diag)
+
+        if len(polygon) == 4 and not LineDoesntPartitionPoints(diag, Line(*flipped)):
+            flippableEdges.append((*diag,))
+    return flippableEdges
+
+print(FindFlippableEdges(T))
+
+[plotpoly(t) for t in T]
 
 plt.show()
