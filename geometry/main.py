@@ -1,7 +1,8 @@
+from __future__ import annotations
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-from itertools import combinations  
+from itertools import combinations, cycle, islice
 
 class Point:
     x: float
@@ -21,6 +22,18 @@ class Point:
             x = (x >> 16) ^ x
             seed ^= x + 0x9e3779b9 + (seed << 6) + (seed >> 2)
         return seed
+    def __add__(self, other: Point):
+        return Point(self.x + other.x, self.y + other.y)
+    def __sub__(self, other: Point):
+        return Point(self.x - other.x, self.y - other.y)
+    def __mul__(self, x):
+        return Point(self.x * x, self.y *x)
+
+
+    def norm(self):
+        return math.sqrt(self.x * self.x + self.y * self.y)
+    def normalized(self):
+        return Point(self.x / (n := self.norm()), self.y / n)
 
 class Line:
     p1: Point
@@ -308,9 +321,9 @@ def FindTriContainingPoint(triangulation: list[tuple[Point]], p: Point):
             return tri
     return False
 
-p = Point(0.75, 0.75)
+# p = Point(0.75, 0.75)
 
-T = [ (Point(0,0),Point(0,1),Point(1,0)), (Point(1,1),Point(0,1),Point(1,0)), (Point(1,0),Point(1,1),Point(2,0)), (Point(2,1),Point(1,1),Point(2,0)), (Point(2,1),Point(3,2),Point(2,0))]
+# T = [ (Point(0,0),Point(0,1),Point(1,0)), (Point(1,1),Point(0,1),Point(1,0)), (Point(1,0),Point(1,1),Point(2,0)), (Point(2,1),Point(1,1),Point(2,0)), (Point(2,1),Point(3,2),Point(2,0))]
 
 
 def FindFlippableEdges(triangulation: list[tuple[Point]]):
@@ -325,8 +338,49 @@ def FindFlippableEdges(triangulation: list[tuple[Point]]):
             flippableEdges.append((*diag,))
     return flippableEdges
 
-print(FindFlippableEdges(T))
+def anglebisect(a: Point, b: Point, c: Point):
+    return ((a-b).normalized() + (c-b).normalized()) * 100 + b
 
-[plotpoly(t) for t in T]
+def projToLine(p: Point, l: Line):
+    m = slope(l)
+    return intersect(l, Line(p, Point(p.x + 10, p.y - (10)/m)))
+
+def distToLine(p: Point, l: Line):
+    return (p-projToLine(p, l)).norm()
+
+def MedialAxis(P: list[Point]):
+    medialAxisPoints = []
+
+    def recurse(P: list[Point]):
+        n = len(P)
+        meetingBisectors: list[tuple[int,Point,int]] = []
+
+        for i in range(len(P)):
+            a,b,c,d = islice(cycle(P), i, i + 4)
+
+            inter = intersect(Line(b, anglebisect(a,b,c)), Line(c, anglebisect(b,c,d)))
+            radius = min(distToLine(inter, edge) for edge in [Line(a,b), Line(b,c), Line(c,d)])
+            meetingBisectors.append((i, inter, radius))
+
+        i, inter, radius = min(meetingBisectors, key=lambda t: t[2])
+        medialAxisPoints.append(inter)
+
+        #remove two vertices and replace them with the newvertex to extend those two edges
+        newvertex = intersect(Line(P[i], P[(i+1)%n]), Line(P[(i+2)%n], P[(i+3)%n]))
+
+        newP = P.copy()
+        newP[(i+1)%n] = newvertex
+        del newP[(i+2)%n]
+
+        if n > 3:
+            recurse(newP)
+
+    recurse(P)
+    return medialAxisPoints
+
+P = [Point(152, 322), Point(332, 268), Point(422,200), Point(286, 88), Point(197,61), Point(61,169), Point(61,269)]
+
+plotpoly(P)
+plotpoints(MedialAxis(P))
 
 plt.show()
