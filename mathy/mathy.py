@@ -4,7 +4,7 @@ from typing import Iterable
 
 import numpy as np
 
-from iterable_helpers import first
+from mathy.iterable_helpers import first
 
 # Returns true iff n is prime
 def isPrime(n: int) -> bool:
@@ -18,7 +18,7 @@ def primeFactors(n: int) -> list[int]:
     return [p for p in range(2,n+1) if n % p == 0 and isPrime(p)]
 
 # Returns a map with keys the prime factors of n and values their p-adic valuations
-def primeFactorization(n: int) -> map[int,int]:
+def primeFactorization(n: int) -> dict[int,int]:
     primes = [p for p in range(2,n + 1) if isPrime(p)]
     factors = {}
     i = 0
@@ -53,6 +53,16 @@ def units(n: int) -> list[int]:
                 u.append(x)
                 break
     return u
+
+# Returns a dict mapping the units of Z/(n) to their inverses
+def inverses(n: int) -> dict[int, int]:
+    inv = {}
+    for x in range(n):
+        for y in range(n):
+            if (x * y) % n == 1:
+                inv[x] = y
+                break
+    return inv
 
 # Euler's phi function
 def phi(n):

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from itertools import permutations
 import math
 
-from mathy import order
+from mathy.mathy import units
 
 Ks = [2,3,4,5,6,7,8,9]
 # Ns = [1,4,8,9,10,12,16,18,20] #nonsquarefree nums
@@ -28,22 +28,42 @@ def createGraph(k: int | list[int],n) -> nx.DiGraph:
 
     return G
 
+def get_graph_units_colormap(N: int):
+    u = units(N)
+    return ['red' if x in u else 'blue' for x in range(N)]
 
-def multiPlot(Ks: list[int], Ns: list[int]):
+def singlePlot(G: nx.MultiDiGraph):
+    plt.plot()
+    color_map = get_graph_units_colormap(G.number_of_nodes())
+    nx.draw(G, with_labels=True, font_color='white', node_color=color_map)
+    plt.show()
+
+def multiPlot(Ks: list[int | list[int]], Ns: list[int]):
     rows = len(Ns)
     cols = len(Ks)
 
+    if rows == 1 and cols == 1:
+        G = createGraph(Ks[0], Ns[0])
+        singlePlot(G)
+        return
+
     fig, axs = plt.subplots(rows, cols, constrained_layout=True)
     for row, n in enumerate(Ns):
+        color_map = get_graph_units_colormap(n)
         for col, k in enumerate(Ks):
-            axs[row,col].set_xticklabels([])
-            axs[row,col].set_yticklabels([])
+            if rows != 1:
+                axs[row,col].set_xticklabels([])
+                axs[row,col].set_yticklabels([])
+                plt.subplot2grid((rows, cols), (row, col))
+            else:
+                axs[col].set_xticklabels([])
+                axs[col].set_yticklabels([])
+                plt.subplot2grid((rows, cols), (row, col))
 
+            # first_k = k if isinstance(k, int) else k[0]
+            # color = ['green','blue','orange','purple', 'red'][(n+first_k)%5]
             G = createGraph(k, n)
-
-            plt.subplot2grid((rows, cols), (row, col))
-            color = ['green','blue','orange','purple', 'red'][(n+k)%5]
-            nx.draw(G, with_labels=True, font_color='white', node_color=color)
+            nx.draw(G, with_labels=True, font_color='white', node_color=color_map)
             # axs[row,col].set_axis_off()
 
             # iscoprime = math.gcd(n,k) == 1
@@ -53,33 +73,33 @@ def multiPlot(Ks: list[int], Ns: list[int]):
 
     fig.canvas.draw()
     # Row labels
-    for row in range(rows):
-        ax = axs[row, 0]  # leftmost column
-        pos = ax.get_position()
-        fig.text(
-            x=pos.x0 + 0.01,
-            y=(pos.y0+pos.y1)/2,
-            s=f'n= {Ns[row]}',
-            ha='right',
-            va='center',
-            fontsize=12,
-        )
+    if rows != 1:
+        for row in range(rows):
+            ax = axs[row, 0]  # leftmost column
+            pos = ax.get_position()
+            fig.text(
+                x=pos.x0 + 0.01,
+                y=(pos.y0+pos.y1)/2,
+                s=f'n= {Ns[row]}',
+                ha='right',
+                va='center',
+                fontsize=12,
+            )
     # Column labels
-    for col in range(cols):
-        ax = axs[0, col]  # top row
-        pos = ax.get_position()
-        fig.text(
-            x=(pos.x0+pos.x1)/2,
-            y=pos.y1-0.01,
-            s=f'k = {Ks[col]}',
-            fontsize=12
-        )
-    plt.show()
+        for col in range(cols):
+            ax = axs[0, col]  # top row
+            pos = ax.get_position()
+            fig.text(
+                x=(pos.x0+pos.x1)/2,
+                y=pos.y1-0.01,
+                s=f'k = {Ks[col]}',
+                fontsize=12
+            )
+    if rows == 1:
+        for i, ax in enumerate(axs):
+            ax.set_title(f'G({Ks[i]}, {Ns[0]})')
 
-def singlePlot(G: nx.MultiDiGraph):
-    plt.plot()
-    nx.draw(G, with_labels=True, font_color='white')
-    plt.show()
+
 
 def automorphisms(graph: nx.MultiDiGraph) -> list[dict[int,int]]:
     return list(nx.algorithms.isomorphism.GraphMatcher(graph, graph).isomorphisms_iter())
@@ -143,24 +163,3 @@ def printFixingNumbersFor2KValuesTables(maxN = 15):
     for N in range(2, maxN):
         printFixingNumbersFor2KValuesTable(N)
         print()
-
-
-
-N = 7
-print(f'N={N}')
-# print('   '+' '.join([str(k) for k in range(1,N)]))
-for k_1 in range(1,N):
-    for k_2 in range(1,N):
-        if k_2 <= k_1: continue
-        o_1 = order(k_1, N)
-        o_2 = order(k_2, N)
-
-        G = createGraph([k_1,k_2], N)
-        G_1 = createGraph(k_1, N)
-        G_2 = createGraph(k_2, N)
-
-        # singlePlot(G)
-        fix_num = fixing_number(G)
-        # print(k_1, k_2)
-        
-        print(f'{k_1}, {k_2}: {fixing_number(G_1)}, {fixing_number(G_2)}; {fix_num}')
